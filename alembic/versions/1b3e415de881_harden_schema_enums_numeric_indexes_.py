@@ -61,7 +61,8 @@ def upgrade() -> None:
     op.alter_column('instruments', 'contract_type',
                existing_type=sa.VARCHAR(length=50),
                type_=sa.Enum('PERPETUAL', 'FUTURES', name='contract_type_enum', create_type=False),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='contract_type::contract_type_enum')
     op.alter_column('instruments', 'tick_size',
                existing_type=sa.INTEGER(),
                type_=sa.Numeric(precision=20, scale=8),
@@ -78,11 +79,13 @@ def upgrade() -> None:
     op.alter_column('orders', 'side',
                existing_type=sa.VARCHAR(length=10),
                type_=sa.Enum('BUY', 'SELL', name='order_side_enum', create_type=False),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='side::order_side_enum')
     op.alter_column('orders', 'order_type',
                existing_type=sa.VARCHAR(length=20),
                type_=sa.Enum('LIMIT', 'MARKET', name='order_type_enum', create_type=False),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='order_type::order_type_enum')
     op.alter_column('orders', 'price',
                existing_type=sa.INTEGER(),
                type_=sa.Numeric(precision=20, scale=8),
@@ -98,7 +101,8 @@ def upgrade() -> None:
     op.alter_column('orders', 'status',
                existing_type=sa.VARCHAR(length=20),
                type_=sa.Enum('OPEN', 'FILLED', 'PARTIALLY_FILLED', 'CANCELLED', 'REJECTED', name='order_status_enum', create_type=False),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='status::order_status_enum')
     op.alter_column('orders', 'leverage',
                existing_type=sa.INTEGER(),
                type_=sa.Numeric(precision=5, scale=2),
@@ -106,7 +110,8 @@ def upgrade() -> None:
     op.alter_column('orders', 'margin_mode',
                existing_type=sa.VARCHAR(length=20),
                type_=sa.Enum('CROSS', 'ISOLATED', name='margin_mode_enum', create_type=False),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='margin_mode::margin_mode_enum')
     op.create_index('idx_orders_instrument_status', 'orders', ['instrument_id', 'status'], unique=False)
     op.create_index('idx_orders_user_id', 'orders', ['user_id'], unique=False)
     op.add_column('trades', sa.Column('updated_at', sa.DateTime(), server_default=sa.text("now()"), nullable=False))
@@ -121,7 +126,8 @@ def upgrade() -> None:
     op.alter_column('trades', 'taker_side',
                existing_type=sa.VARCHAR(length=10),
                type_=sa.Enum('BUY', 'SELL', name='taker_side_enum', create_type=False),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='taker_side::taker_side_enum')
     op.create_index('idx_trades_instrument_id', 'trades', ['instrument_id'], unique=False)
     op.add_column('users', sa.Column('updated_at', sa.DateTime(), server_default=sa.text("now()"), nullable=False))
     op.add_column('wallets', sa.Column('created_at', sa.DateTime(), server_default=sa.text("now()"), nullable=False))
@@ -155,7 +161,8 @@ def downgrade() -> None:
     op.alter_column('trades', 'taker_side',
                existing_type=sa.Enum('BUY', 'SELL', name='taker_side_enum'),
                type_=sa.VARCHAR(length=10),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='taker_side::varchar')
     op.alter_column('trades', 'quantity',
                existing_type=sa.Numeric(precision=20, scale=8),
                type_=sa.INTEGER(),
@@ -170,7 +177,8 @@ def downgrade() -> None:
     op.alter_column('orders', 'margin_mode',
                existing_type=sa.Enum('CROSS', 'ISOLATED', name='margin_mode_enum'),
                type_=sa.VARCHAR(length=20),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='margin_mode::varchar')
     op.alter_column('orders', 'leverage',
                existing_type=sa.Numeric(precision=5, scale=2),
                type_=sa.INTEGER(),
@@ -178,7 +186,8 @@ def downgrade() -> None:
     op.alter_column('orders', 'status',
                existing_type=sa.Enum('OPEN', 'FILLED', 'PARTIALLY_FILLED', 'CANCELLED', 'REJECTED', name='order_status_enum'),
                type_=sa.VARCHAR(length=20),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='status::varchar')
     op.alter_column('orders', 'filled_quantity',
                existing_type=sa.Numeric(precision=20, scale=8),
                type_=sa.INTEGER(),
@@ -194,11 +203,13 @@ def downgrade() -> None:
     op.alter_column('orders', 'order_type',
                existing_type=sa.Enum('LIMIT', 'MARKET', name='order_type_enum'),
                type_=sa.VARCHAR(length=20),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='order_type::varchar')
     op.alter_column('orders', 'side',
                existing_type=sa.Enum('BUY', 'SELL', name='order_side_enum'),
                type_=sa.VARCHAR(length=10),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='side::varchar')
     op.drop_column('orders', 'updated_at')
     op.alter_column('instruments', 'maintenance_margin_rate',
                existing_type=sa.Numeric(precision=10, scale=8),
@@ -215,7 +226,8 @@ def downgrade() -> None:
     op.alter_column('instruments', 'contract_type',
                existing_type=sa.Enum('PERPETUAL', 'FUTURES', name='contract_type_enum'),
                type_=sa.VARCHAR(length=50),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='contract_type::varchar')
     op.drop_column('instruments', 'updated_at')
     op.drop_column('instruments', 'created_at')
     op.drop_table('positions')

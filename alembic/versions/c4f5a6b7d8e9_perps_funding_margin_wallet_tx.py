@@ -18,7 +18,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute("CREATE TYPE wallet_transaction_type_enum AS ENUM ('DEPOSIT', 'WITHDRAW')")
+    op.execute(
+        "DO $$ BEGIN CREATE TYPE wallet_transaction_type_enum AS ENUM ('DEPOSIT', 'WITHDRAW'); "
+        "EXCEPTION WHEN duplicate_object THEN NULL; END $$"
+    )
 
     op.add_column(
         "instruments",
@@ -53,7 +56,7 @@ def upgrade() -> None:
         "wallet_transactions",
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("wallet_id", sa.UUID(), nullable=False),
-        sa.Column("type", sa.Enum("DEPOSIT", "WITHDRAW", name="wallet_transaction_type_enum"), nullable=False),
+        sa.Column("type", sa.dialects.postgresql.ENUM("DEPOSIT", "WITHDRAW", name="wallet_transaction_type_enum", create_type=False), nullable=False),
         sa.Column("amount", sa.Numeric(20, 8), nullable=False),
         sa.Column("balance_after", sa.Numeric(20, 8), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
