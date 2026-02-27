@@ -1,10 +1,12 @@
-from email.policy import default
 import uuid
-from sqlalchemy import String, Boolean, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
+
+from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from backend.core.database import Base
+
 
 class Users(Base):
     __tablename__ = "users"
@@ -13,4 +15,11 @@ class Users(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    wallets = relationship("Wallet", back_populates="user")

@@ -1,9 +1,14 @@
-from sqlalchemy import Integer, ForeignKey, DateTime, String
-from sqlalchemy.orm import Mapped, mapped_column
-from datetime import datetime, timezone
-from backend.core.database import Base
+from decimal import Decimal
 import uuid
+from datetime import datetime, timezone
+
+from sqlalchemy import DateTime, Enum, ForeignKey, Numeric, String, Index
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
+
+from backend.core.database import Base
+from backend.models.enums import TakerSide
+
 
 class Trade(Base):
     __tablename__ = "trades"
@@ -13,8 +18,15 @@ class Trade(Base):
     buy_order_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("orders.id"))
     sell_order_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("orders.id"))
 
-    price: Mapped[int] = mapped_column(Integer)
-    quantity: Mapped[int] = mapped_column(Integer)
-    taker_side: Mapped[str] = mapped_column(String(10))
+    price: Mapped[Decimal] = mapped_column(Numeric(20, 8))
+    quantity: Mapped[Decimal] = mapped_column(Numeric(20, 8))
+    taker_side: Mapped[TakerSide] = mapped_column(Enum(TakerSide, name="taker_side_enum"))
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    __table_args__ = (Index("idx_trades_instrument_id", "instrument_id"),)

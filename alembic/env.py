@@ -10,9 +10,11 @@ from backend.core.database import Base
 # Import all models so they are registered with Base.metadata before autogenerate
 from backend.models.instrument import Instrument  # noqa: F401
 from backend.models.order import Order  # noqa: F401
+from backend.models.position import Position  # noqa: F401
 from backend.models.trade import Trade  # noqa: F401
 from backend.models.user import Users  # noqa: F401
 from backend.models.wallet import Wallet  # noqa: F401
+from backend.models.wallet_transaction import WalletTransaction  # noqa: F401
 
 # for 'autogenerate' support
 target_metadata = Base.metadata
